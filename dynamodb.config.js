@@ -2,7 +2,9 @@ const {
   CreateTableCommand,
   DescribeTableCommand,
   DynamoDBClient,
+  QueryCommand,
 } = require("@aws-sdk/client-dynamodb");
+const { ScanCommand, PutCommand } = require("@aws-sdk/lib-dynamodb");
 
 const REGION = "ap-southeast-1";
 const TABLE_NAME = "tasks";
@@ -44,6 +46,64 @@ const prepareTable = () => {
   }
 };
 
+const getTasks = async () => {
+  const command = new ScanCommand({
+    ExpressionAttributeNames: { "#status": "status" },
+    ProjectionExpression: "id, description, #status, title",
+    TableName: TABLE_NAME,
+  });
+  try {
+    const response = await dynamoDBClient.send(command);
+    return response;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const getTask = async (id) => {
+  const command = new QueryCommand({
+    ConsistentRead: true,
+    KeyConditionExpression: "id = :id ",
+    ExpressionAttributeValues: {
+      ":id": { S: `${id}` },
+    },
+    ReturnConsumedCapacity: "TOTAL",
+    TableName: TABLE_NAME,
+  });
+  try {
+    const response = await dynamoDBClient.send(command);
+    return response;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const createTask = async ({ title, description, status }) => {
+  const command = new PutCommand({
+    TableName: TABLE_NAME,
+    Item: {
+      id: crypto.randomUUID(),
+      title,
+      description,
+      status,
+    },
+  });
+
+  try {
+    const response = await dynamoDBClient.send(command);
+    return response;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const updateTask = async () => {};
+
+const deleteTask = async () => {};
+
 module.exports = {
   prepareTable,
+  getTasks,
+  getTask,
+  createTask,
 };
