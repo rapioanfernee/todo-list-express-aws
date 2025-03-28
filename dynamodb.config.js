@@ -8,6 +8,7 @@ const {
   ScanCommand,
   PutCommand,
   UpdateCommand,
+  DeleteCommand,
 } = require("@aws-sdk/lib-dynamodb");
 
 const REGION = "ap-southeast-1";
@@ -117,7 +118,16 @@ const updateTask = async ({ id, title, description, status }) => {
   return await executeTableCommand(command);
 };
 
-const deleteTask = async () => {};
+const deleteTask = async (id) => {
+  const command = new DeleteCommand({
+    TableName: TABLE_NAME,
+    Key: {
+      id,
+    },
+  });
+
+  return await executeTableCommand(command);
+};
 
 module.exports = {
   prepareTable,
@@ -125,4 +135,5 @@ module.exports = {
   getTask,
   createTask,
   updateTask,
+  deleteTask,
 };

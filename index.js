@@ -8,6 +8,7 @@ const {
   getTask,
   createTask,
   updateTask,
+  deleteTask,
 } = require("./dynamodb.config.js");
 
 const app = express();
@@ -18,14 +19,12 @@ app.use(express.json());
 // Get All
 app.get("/tasks", async (req, res) => {
   const response = await getTasks();
-  console.log(response);
   res.send(response.Items);
 });
 
 // Get One
 app.get("/tasks/:id", async (req, res) => {
   const response = await getTask(req.params.id);
-  console.log(response);
   res.send(response.Items);
 });
 
@@ -50,8 +49,13 @@ app.put("/tasks", async (req, res) => {
 });
 
 // Delete
-app.delete("/tasks/:id", (req, res) => {
-  res.send(`Test Tasks ${req.params.id}`);
+app.delete("/tasks/:id", async (req, res) => {
+  try {
+    const response = await deleteTask(req.params.id);
+    res.status(200).send("Successfully deleted task");
+  } catch (err) {
+    res.status(400).send("Failed to delete task");
+  }
 });
 
 if (process.env.DEVELOPMENT) {
