@@ -4,7 +4,11 @@ const {
   DynamoDBClient,
   QueryCommand,
 } = require("@aws-sdk/client-dynamodb");
-const { ScanCommand, PutCommand } = require("@aws-sdk/lib-dynamodb");
+const {
+  ScanCommand,
+  PutCommand,
+  UpdateCommand,
+} = require("@aws-sdk/lib-dynamodb");
 
 const REGION = "ap-southeast-1";
 const TABLE_NAME = "tasks";
@@ -46,18 +50,22 @@ const prepareTable = () => {
   }
 };
 
-const getTasks = async () => {
-  const command = new ScanCommand({
-    ExpressionAttributeNames: { "#status": "status" },
-    ProjectionExpression: "id, description, #status, title",
-    TableName: TABLE_NAME,
-  });
+const executeTableCommand = async (command) => {
   try {
     const response = await dynamoDBClient.send(command);
     return response;
   } catch (err) {
     console.log(err);
   }
+};
+
+const getTasks = async () => {
+  const command = new ScanCommand({
+    ExpressionAttributeNames: { "#status": "status" },
+    ProjectionExpression: "id, description, #status, title",
+    TableName: TABLE_NAME,
+  });
+  return await executeTableCommand(command);
 };
 
 const getTask = async (id) => {
@@ -70,12 +78,7 @@ const getTask = async (id) => {
     ReturnConsumedCapacity: "TOTAL",
     TableName: TABLE_NAME,
   });
-  try {
-    const response = await dynamoDBClient.send(command);
-    return response;
-  } catch (err) {
-    console.log(err);
-  }
+  return await executeTableCommand(command);
 };
 
 const createTask = async ({ title, description, status }) => {
@@ -89,15 +92,30 @@ const createTask = async ({ title, description, status }) => {
     },
   });
 
-  try {
-    const response = await dynamoDBClient.send(command);
-    return response;
-  } catch (err) {
-    console.log(err);
-  }
+  return await executeTableCommand(command);
 };
 
-const updateTask = async () => {};
+const updateTask = async ({ id, title, description, status }) => {
+  const command = new UpdateCommand({
+    TableName: TABLE_NAME,
+    Key: {
+      id,
+    },
+    ExpressionAttributeNames: {
+      "#status": "status",
+    },
+    ExpressionAttributeValues: {
+      ":title": title,
+      ":description": description,
+      ":status": status,
+    },
+    UpdateExpression:
+      "set title = :title, description = :description, #status = :status",
+    ReturnValues: "ALL_NEW",
+  });
+
+  return await executeTableCommand(command);
+};
 
 const deleteTask = async () => {};
 
@@ -106,4 +124,5 @@ module.exports = {
   getTasks,
   getTask,
   createTask,
+  updateTask,
 };

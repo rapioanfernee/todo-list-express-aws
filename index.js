@@ -7,36 +7,49 @@ const {
   getTasks,
   getTask,
   createTask,
+  updateTask,
 } = require("./dynamodb.config.js");
 
 const app = express();
-const port = 3000;
+const port = 3001;
 
 app.use(express.json());
 
+// Get All
 app.get("/tasks", async (req, res) => {
   const response = await getTasks();
+  console.log(response);
   res.send(response.Items);
 });
 
+// Get One
+app.get("/tasks/:id", async (req, res) => {
+  const response = await getTask(req.params.id);
+  console.log(response);
+  res.send(response.Items);
+});
+
+// Post
 app.post("/tasks", async (req, res) => {
   try {
     const response = await createTask(req.body);
     res.status(200).send("Successfully created task");
   } catch (err) {
-    res.status(400).send("Invalid");
+    res.status(400).send("Failed to create task");
   }
 });
 
-app.get("/tasks/:id", async (req, res) => {
-  const response = await getTask(req.params.id);
-  res.send(response.Items);
+// Update
+app.put("/tasks", async (req, res) => {
+  try {
+    const response = await updateTask(req.body);
+    res.status(200).send("Successfully updated task");
+  } catch (err) {
+    res.status(400).send("Failed to update task");
+  }
 });
 
-app.put("/tasks/:id", (req, res) => {
-  res.send(`Test Tasks ${req.params.id}`);
-});
-
+// Delete
 app.delete("/tasks/:id", (req, res) => {
   res.send(`Test Tasks ${req.params.id}`);
 });
