@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const serverless = require("serverless-http");
+const cors = require("cors");
 dotenv.config();
 const {
   prepareTable,
@@ -15,6 +16,7 @@ const app = express();
 const port = 3001;
 
 app.use(express.json());
+app.use(cors());
 
 // Get All
 app.get("/tasks", async (req, res) => {
