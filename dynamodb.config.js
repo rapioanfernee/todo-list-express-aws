@@ -92,8 +92,13 @@ const createTask = async ({ title, description, status }) => {
       status,
     },
   });
-
-  return await executeTableCommand(command);
+  await executeTableCommand(command);
+  return {
+    id: crypto.randomUUID(),
+    title,
+    description,
+    status,
+  };
 };
 
 const updateTask = async ({ id, title, description, status }) => {
@@ -114,8 +119,8 @@ const updateTask = async ({ id, title, description, status }) => {
       "set title = :title, description = :description, #status = :status",
     ReturnValues: "ALL_NEW",
   });
-
-  return await executeTableCommand(command);
+  await executeTableCommand(command);
+  return { id, title, description, status };
 };
 
 const deleteTask = async (id) => {

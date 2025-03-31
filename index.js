@@ -34,7 +34,7 @@ app.get("/tasks/:id", async (req, res) => {
 app.post("/tasks", async (req, res) => {
   try {
     const response = await createTask(req.body);
-    res.status(200).send("Successfully created task");
+    res.status(200).send(response);
   } catch (err) {
     res.status(400).send("Failed to create task");
   }
@@ -44,7 +44,7 @@ app.post("/tasks", async (req, res) => {
 app.put("/tasks", async (req, res) => {
   try {
     const response = await updateTask(req.body);
-    res.status(200).send("Successfully updated task");
+    res.status(200).send(response);
   } catch (err) {
     res.status(400).send("Failed to update task");
   }
@@ -54,7 +54,7 @@ app.put("/tasks", async (req, res) => {
 app.delete("/tasks/:id", async (req, res) => {
   try {
     const response = await deleteTask(req.params.id);
-    res.status(200).send("Successfully deleted task");
+    res.status(200).send(req.params.id);
   } catch (err) {
     res.status(400).send("Failed to delete task");
   }
